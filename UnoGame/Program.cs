@@ -17,6 +17,8 @@ namespace UnoGame
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
+            var logic = new Logic();
+            logic.setupCards();
         }
     }
 }
