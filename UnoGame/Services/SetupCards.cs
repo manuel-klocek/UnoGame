@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnoGame.Repositories;
 
 namespace UnoGame
 {
@@ -30,8 +31,8 @@ namespace UnoGame
                 cards.Add(new Card(color, "+2"));
                 cards.Add(new Card(color, "!!"));
                 cards.Add(new Card(color, "!!"));
-                cards.Add(new Card(color, "&&"));
-                cards.Add(new Card(color, "&&"));
+                cards.Add(new Card(color, "<>"));
+                cards.Add(new Card(color, "<>"));
             }
 
             //Black Cards: +4 und Farbwahl (==)
@@ -61,6 +62,19 @@ namespace UnoGame
                 cards.Remove(cards[randomElementInList]);
             }
             return newShuffledList;
+        }
+
+        public CardStack setupCardStack(List<Card> cards)
+        {
+            foreach(var card in cards)
+            {
+                if (card.GetColor() != "black" ||
+                    card.GetSymbol() != "!!" ||
+                    card.GetSymbol() != "<>" ||
+                    card.GetSymbol() != "+2") return new CardStack(card);
+                break;
+            }
+            return new CardStack(cards[0]);
         }
     }
 }

@@ -31,11 +31,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
-    <StartAction>Project</StartAction>
-    <ExternalConsole>true</ExternalConsole>
-    <TargetRuntimeId>Mono 6.12.0.188 (ca8abcb6bc4)</TargetRuntimeId>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -79,17 +74,21 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Models\Card.cs" />
-    <Compile Include="Models\PlayerCards.cs" />
     <Compile Include="Services\Logic.cs" />
     <Compile Include="Services\SetupCards.cs" />
+    <Compile Include="GameInConsole.cs" />
+    <Compile Include="Repositories\Card.cs" />
+    <Compile Include="Repositories\PlayerCards.cs" />
+    <Compile Include="Repositories\Players.cs" />
+    <Compile Include="Repositories\Rotation.cs" />
+    <Compile Include="Repositories\Stacks.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Models\" />
     <Folder Include="Services\" />
+    <Folder Include="Repositories\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
