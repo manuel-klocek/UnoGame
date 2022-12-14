@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnoGame.Repositories;
+using UnoGame.Services;
 
 namespace UnoGame
 {
@@ -14,11 +15,13 @@ namespace UnoGame
             var playerCount = Convert.ToInt32(Console.ReadLine());
             var logic = new Logic();
             var setup = new SetupCards();
+            var sort = new Sort();
             var playersSetup = new Players(playerCount);
             var clockwiseRotation = new Rotation();
             var players = playersSetup.GetPlayers();
             var cards = setup.Run();
-            var playerHands = logic.StartGame(cards, playerCount);
+            var unsortedHands = logic.StartGame(cards, playerCount);
+            var playerHands = sort.Hands(unsortedHands);
             var cardStack = setup.setupCardStack(cards);
             var takeStack = new TakeStack(cards);
 

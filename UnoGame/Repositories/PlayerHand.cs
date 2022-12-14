@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace UnoGame.Repositories
 {
-	internal class PlayerHand
+	public class PlayerHand
 	{
         readonly List<Card> playerCards;
 
@@ -29,4 +29,3 @@ namespace UnoGame.Repositories
         }
     }
 }
-

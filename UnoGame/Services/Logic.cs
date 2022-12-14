@@ -29,15 +29,8 @@ namespace UnoGame
             return playerHands;
         }
 
-        public void RemoveCardFrom(PlayerHand hand, List<Card> cards, Card card)
-        {
-            var playerCards = hand.GetPlayerCards();
-            playerCards.Remove(card);
-        }
-
         public bool evaluate(string command, TakeStack takeStack, CardStack cardStack, PlayerHand hand, Card card = null)
         {
-            //Existing Commands: take, place
             Card takeCard;
             switch (command) {
                 case "take":
@@ -107,8 +100,6 @@ namespace UnoGame
         }
 
 
-        /// 
-
         public bool CheckAndRunEventsThenSkip(CardStack stack, PlayerHand hand, TakeStack takeStack, Players playersSetup, Rotation rotation)
         {
             var takeNum = 0;
@@ -120,6 +111,7 @@ namespace UnoGame
                     AddPenaltyToHand(takeNum, hand, takeStack);
                     break;
                 case "+4":
+                    if (CanForwardPenalty(stack, hand)) return true;
                     takeNum = SearchForStreak(stack);
                     AddPenaltyToHand(takeNum, hand, takeStack);
                     break;

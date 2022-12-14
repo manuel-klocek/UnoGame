@@ -68,13 +68,12 @@ namespace UnoGame
         {
             foreach(var card in cards)
             {
-                if (card.GetColor() != "black" ||
-                    card.GetSymbol() != "!!" ||
-                    card.GetSymbol() != "<>" ||
+                if (card.GetColor() != "black" &&
+                    card.GetSymbol() != "!!" &&
+                    card.GetSymbol() != "<>" &&
                     card.GetSymbol() != "+2") return new CardStack(card);
-                break;
             }
-            return new CardStack(cards[0]);
+            return new CardStack(new Card("", ""));
         }
     }
 }
