@@ -6,12 +6,15 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{E55ABEA0-E3F9-4457-A73A-4F362D18EC72}</ProjectGuid>
     <OutputType>WinExe</OutputType>
+    <Nullable>Enable</Nullable>
     <RootNamespace>UnoGame</RootNamespace>
     <AssemblyName>UnoGame</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <ReleaseVersion>1.0</ReleaseVersion>
+    <SynchReleaseVersion>false</SynchReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,6 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -30,6 +34,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -78,12 +83,13 @@
     <Compile Include="Services\SetupCards.cs" />
     <Compile Include="GameInConsole.cs" />
     <Compile Include="Repositories\Card.cs" />
-    <Compile Include="Repositories\PlayerHand.cs" />
     <Compile Include="Repositories\Players.cs" />
     <Compile Include="Repositories\Rotation.cs" />
     <Compile Include="Repositories\Stacks.cs" />
     <Compile Include="Services\Sort.cs" />
     <None Include="UnoGameUML.drawio" />
+    <Compile Include="Services\ArtificialIntelligenceService.cs" />
+    <Compile Include="Repositories\Table.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

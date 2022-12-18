@@ -2,21 +2,21 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnoGame.Repositories;
+using UnoGame.Services;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 
 namespace UnoGame
 {
     internal class Logic
     {
+        readonly ArtificialIntelligenceService ai = new ArtificialIntelligenceService();
 
         public List<PlayerHand> StartGame(List<Card> cards, int playerCount)
         {
             var random = new Random();
-            //for each player
             var playerHands = new List<PlayerHand>();
             for(int i = 0; i < playerCount; i++)
             {
-                //7 cards per player
                 var hand = new List<Card>();
                 for(int j = 0; j < 7; j++)
                 {
@@ -29,38 +29,55 @@ namespace UnoGame
             return playerHands;
         }
 
-        public bool evaluate(string command, TakeStack takeStack, CardStack cardStack, PlayerHand hand, Card card = null)
+        public bool evaluate(Table table, int currentPlayerIndex, Card? card, bool isBot)
         {
-            Card takeCard;
-            switch (command) {
-                case "take":
-                    takeCard = takeStack.TakeOne();
-                    if (Allowed(cardStack, takeCard))
-                    {
-                        Console.WriteLine("{0} {1} ist dein Karte. Möchtest du sie legen? (ja/nein): ", takeCard.GetColor(), takeCard.GetSymbol());
-                        if (String.Compare(Console.ReadLine(), "ja") == 0)
-                        {
-                            CheckForBlackColor(takeCard);
-                            cardStack.Add(takeCard);
-                        }
-                        else hand.Add(takeCard);
-                    }
-                    break;
-                case "place":
-                    if (Allowed(cardStack, card))
-                    {
-                        CheckForBlackColor(card);
-                        cardStack.Add(card);
-                        hand.RemoveOne(card);
-                        break;
-                    }
-                    else
-                    {
-                        Console.WriteLine("{0} {1} is not an allowed Card!", card.GetColor(), card.GetSymbol());
-                        return false;
-                    }
-            }
+            if(card == null) ExecuteTake(table, currentPlayerIndex, isBot);
+            else return ExecutePlace(table, card, currentPlayerIndex, isBot);
             return true;
+        }
+
+        private void ExecuteTake(Table table, int currentPlayerIndex, bool isBot)
+        {
+            var takeCard = table.takeStack.TakeOne();
+            var hand = table.playerHands[currentPlayerIndex];
+            if (!Allowed(table.cardStack, takeCard))
+            {
+                hand.Add(takeCard);
+                Console.WriteLine($"Du hast die Karte {takeCard.GetColor()} {takeCard.GetSymbol()} aufgenommen!");
+                return;
+            }
+
+            if (!isBot)
+            {
+                Console.WriteLine("{0} {1} ist dein Karte. Möchtest du sie legen? (ja/nein): ", takeCard.GetColor(), takeCard.GetSymbol());
+                if (String.Compare(Console.ReadLine(), "ja") != 0) hand.Add(takeCard);
+                else
+                {
+                    CheckForBlackColor(hand, takeCard, isBot);
+                    table.cardStack.Add(takeCard);
+                    Console.WriteLine($"Du hast die Karte {takeCard.GetColor()} {takeCard.GetSymbol()} gelegt!");
+                }
+                return;
+            }
+
+            CheckForBlackColor(hand, takeCard, isBot);
+            table.cardStack.Add(takeCard);
+            Console.WriteLine($"Du hast die Karte {takeCard.GetColor()} {takeCard.GetSymbol()} gelegt!");
+        }
+
+        private bool ExecutePlace(Table table, Card card, int currentPlayerIndex, bool isBot)
+        {
+            var hand = table.playerHands[currentPlayerIndex];
+            if (Allowed(table.cardStack, card))
+            {
+                CheckForBlackColor(hand, card, isBot);
+                table.cardStack.Add(card);
+                hand.RemoveOne(card);
+                Console.WriteLine($"Du hast die Karte {card.GetColor()} {card.GetSymbol()} gelegt!");
+                return true;
+            }
+            Console.WriteLine("{0} {1} is not an allowed Card!", card.GetColor(), card.GetSymbol());
+            return false;
         }
 
         private void AddPenaltyToHand(int takeNum, PlayerHand hand, TakeStack takeStack)
@@ -76,56 +93,56 @@ namespace UnoGame
         
         public bool Allowed(CardStack cardStack, Card card)
         {
-            bool allowed;
             var lastPlacedCard = cardStack.GetRealLast();
 
             if ((card.GetSymbol() == "+2" && lastPlacedCard.GetSymbol() == "+2") ||
-                (card.GetColor() == "black")) allowed = true;
+                (card.GetColor() == "black")) return true;
             else if ((card.GetSymbol() == lastPlacedCard.GetSymbol()) ||
-                     (card.GetColor() == lastPlacedCard.GetColor())) allowed = true;
-            else allowed = false;
-            return allowed;
+                     (card.GetColor() == lastPlacedCard.GetColor())) return true;
+            else return false;
         }
 
-        private void CheckForBlackColor(Card card)
+        private void CheckForBlackColor(PlayerHand hand, Card card, bool isBot)
         {
-            if(card.GetColor() == "black") askUserForColor(card);
+            if (card.GetColor() != "black") return;
+            if (isBot)
+            {
+                card.SetColor(ai.determineColor(hand.GetPlayerCards()));
+            }
+            else
+            {
+                Console.WriteLine("Gib deine Wunschfarbe ein (green, red, yellow, blue): ");
+                card.SetColor(Console.ReadLine());
+            }
         }
 
 
-        private void askUserForColor(Card card)
+        public bool CheckAndRunEventsThenSkip(Table table, int currentPlayerIndex)
         {
-            Console.WriteLine("Gib deine Wunschfarbe ein (green, red, yellow, blue): ");
-            card.SetColor(Console.ReadLine());
-        }
-
-
-        public bool CheckAndRunEventsThenSkip(CardStack stack, PlayerHand hand, TakeStack takeStack, Players playersSetup, Rotation rotation)
-        {
-            var takeNum = 0;
-            switch(stack.GetLast().GetSymbol())
+            var hand = table.playerHands[currentPlayerIndex];
+            switch(table.cardStack.GetLast().GetSymbol())
             {
                 case "+2":
-                    if (CanForwardPenalty(stack, hand)) return true;
-                    takeNum = SearchForStreak(stack);
-                    AddPenaltyToHand(takeNum, hand, takeStack);
+                    if (CanForwardPenalty(table.cardStack, hand)) return true;
+                    var takeNum = SearchForStreak(table.cardStack);
+                    AddPenaltyToHand(takeNum, hand, table.takeStack);
                     break;
                 case "+4":
-                    if (CanForwardPenalty(stack, hand)) return true;
-                    takeNum = SearchForStreak(stack);
-                    AddPenaltyToHand(takeNum, hand, takeStack);
+                    if (CanForwardPenalty(table.cardStack, hand)) return true;
+                    takeNum = SearchForStreak(table.cardStack);
+                    AddPenaltyToHand(takeNum, hand, table.takeStack);
                     break;
                 case "!!":
                     Console.WriteLine("Du musst aussetzen!");
                     break;
                 case "<>":
                     Console.WriteLine("Richtungswechsel!");
-                    rotation.Change();
+                    table.rotation.Change();
                     break;
                 default:
                     return false;
             }
-            AddUnvisibleCard(stack);
+            AddUnvisibleCard(table.cardStack);
             return true;
         }
 

@@ -20,6 +20,7 @@ namespace UnoGame
             //Application.SetCompatibleTextRenderingDefault(false);
             //Application.Run(new Form1());
             new GameInConsole().Run();
+            Console.ReadLine();
         }
     }
 }

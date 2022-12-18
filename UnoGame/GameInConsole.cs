@@ -7,60 +7,61 @@ namespace UnoGame
 {
 	public class GameInConsole
 	{
-		public GameInConsole() {}
+        readonly ArtificialIntelligenceService ai = new ArtificialIntelligenceService();
 
 		public void Run()
 		{
             Console.WriteLine("Geben Sie die Anzahl der Spieler an: ");
             var playerCount = Convert.ToInt32(Console.ReadLine());
+            Console.WriteLine("Geben Sie die Anzahl der KIs an: ");
+            var botCount = Convert.ToInt32(Console.ReadLine());
             var logic = new Logic();
             var setup = new SetupCards();
             var sort = new Sort();
-            var playersSetup = new Players(playerCount);
-            var clockwiseRotation = new Rotation();
-            var players = playersSetup.GetPlayers();
             var cards = setup.Run();
-            var unsortedHands = logic.StartGame(cards, playerCount);
-            var playerHands = sort.Hands(unsortedHands);
-            var cardStack = setup.setupCardStack(cards);
-            var takeStack = new TakeStack(cards);
+            var unsortedHands = logic.StartGame(cards, playerCount + botCount);
+            var table = new Table(setup.setupCardStack(cards), new TakeStack(cards), new Rotation(), new Players(playerCount, botCount, sort.Hands(unsortedHands)));
 
-
-            int currentPlayer = 0;
-            while (players.Count > 1)
+            int currentPlayerIndex = 0;
+            while (table.players.GetPlayerHands().Count > 1)
             {
+                var players = table.players.GetPlayers();
+                var playerCards = table.players.GetPlayerHands()[currentPlayerIndex].GetPlayerCards();
+                var currentPlayer = table.players.GetPlayers()[currentPlayerIndex];
+
                 Console.WriteLine();
-                Console.WriteLine(players[currentPlayer]);
-                var playerCards = playerHands[currentPlayer].GetPlayerCards();
+                Console.WriteLine(table.players.GetPlayers()[currentPlayerIndex].GetName());
 
-                if (playerCards.Count == 0)
-                {
-                    players.Remove(players[currentPlayer]);
-                }
 
-                var direction = clockwiseRotation.Get();
-                if (!logic.CheckAndRunEventsThenSkip(cardStack, playerHands[currentPlayer], takeStack, playersSetup, clockwiseRotation))
+                var direction = table.rotation.Get();
+                if (!logic.CheckAndRunEventsThenSkip(table, currentPlayerIndex))
                 {
-                    Console.WriteLine("Stack: " + cardStack.GetRealLast().GetColor() + " " + cardStack.GetRealLast().GetSymbol());
+                    Console.WriteLine("Stack: " + table.cardStack.GetRealLast().GetColor() + " " + table.cardStack.GetRealLast().GetSymbol());
                     Print(playerCards);
-                    var command = GetUserCommand();
-                    Card card = null;
 
-                    if (command != "take") card = playerCards[GetCardIndex()];
+                    Card? card = null;
+                    string? command = null;
+                    if (!currentPlayer.GetBot()) command = GetUserCommand();
+                    else card = ai.determineMove(table, currentPlayerIndex);
 
-                    if (!logic.evaluate(command, takeStack, cardStack, playerHands[currentPlayer], card))
-                    {
-                        currentPlayer--;
-                    }
+                    if (command != null && command == "place") card = playerCards[GetCardIndex()];
+
+                    if (!logic.evaluate(table, currentPlayerIndex, card, currentPlayer.GetBot())) currentPlayerIndex--;
                 }
 
-                if (direction != clockwiseRotation.Get() && !clockwiseRotation.Get()) currentPlayer-= 2;
-                else if (clockwiseRotation.Get()) currentPlayer++;
-                else currentPlayer--;
+                if (table.players.GetPlayerHands()[currentPlayerIndex].GetPlayerCards().Count == 0)
+                {
+                    currentPlayer.Remove(players[currentPlayerIndex]);
+                    continue;
+                }
 
-                if (currentPlayer == -1 && !clockwiseRotation.Get()) currentPlayer = playerCount - 1;
-                else if (currentPlayer == -2 && !clockwiseRotation.Get()) currentPlayer = playerCount - 2;
-                else if (currentPlayer >= playerCount && clockwiseRotation.Get()) currentPlayer = 0;
+                if (direction != table.rotation.Get() && !table.rotation.Get()) currentPlayerIndex-= 2;
+                else if (table.rotation.Get()) currentPlayerIndex++;
+                else currentPlayerIndex--;
+
+                if (currentPlayerIndex == -1 && !table.rotation.Get()) currentPlayerIndex = players.Count - 1;
+                else if (currentPlayerIndex == -2 && !table.rotation.Get()) currentPlayerIndex = players.Count - 2;
+                else if (currentPlayerIndex >= players.Count && table.rotation.Get()) currentPlayerIndex = 0;
             }
         }
 
@@ -70,7 +71,7 @@ namespace UnoGame
             return Convert.ToInt32(Console.ReadLine());
         }
 
-        private static string GetUserCommand()
+        private string GetUserCommand()
         {
             Console.WriteLine("Gib deine Aktion ein (place, take): ");
             return Console.ReadLine();

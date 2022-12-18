@@ -6,7 +6,6 @@ namespace UnoGame.Repositories
 	public class CardStack
     {
 
-        //Stack of played cards
         readonly List<Card> stack;
 
         public CardStack(Card firstCard)
@@ -41,8 +40,6 @@ namespace UnoGame.Repositories
 
     public class TakeStack
     {
-
-        //Stack of cards to take from stack
         List<Card> stack;
 
         public TakeStack(List<Card> stackCards)
