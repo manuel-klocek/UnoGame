@@ -23,9 +23,8 @@ namespace UnoGame
             var table = new Table(setup.setupCardStack(cards), new TakeStack(cards), new Rotation(), new Players(playerCount, botCount, sort.Hands(unsortedHands)));
 
             int currentPlayerIndex = 0;
-            while (table.players.GetPlayerHands().Count > 1)
+            while (table.players.GetPlayers().Count > 1)
             {
-                var players = table.players.GetPlayers();
                 var playerCards = table.players.GetPlayerHands()[currentPlayerIndex].GetPlayerCards();
                 var currentPlayer = table.players.GetPlayers()[currentPlayerIndex];
 
@@ -34,7 +33,7 @@ namespace UnoGame
 
 
                 var direction = table.rotation.Get();
-                if (!logic.CheckAndRunEventsThenSkip(table, currentPlayerIndex))
+                if (!logic.CheckAndRunEventsThenSkip(table, currentPlayerIndex, currentPlayer.GetBot()))
                 {
                     Console.WriteLine("Stack: " + table.cardStack.GetRealLast().GetColor() + " " + table.cardStack.GetRealLast().GetSymbol());
                     Print(playerCards);
@@ -51,16 +50,22 @@ namespace UnoGame
 
                 if (table.players.GetPlayerHands()[currentPlayerIndex].GetPlayerCards().Count == 0)
                 {
-                    currentPlayer.Remove(players[currentPlayerIndex]);
-                    continue;
+                    var num = table.players.GetPlayers().Count;
+                    table.players.GetPlayers().Remove(currentPlayer);
+                    var num2 = table.players.GetPlayers().Count;
+                    table.players.GetPlayerHands().Remove(table.players.GetPlayerHands()[currentPlayerIndex]);
+                    Console.WriteLine();
+                    Console.WriteLine("------------------------------------------");
+                    Console.WriteLine($"        {currentPlayer.GetName()}: UNO UNO!");
+                    Console.WriteLine("------------------------------------------");
                 }
 
                 if (direction != table.rotation.Get() && !table.rotation.Get()) currentPlayerIndex-= 2;
                 else if (table.rotation.Get()) currentPlayerIndex++;
                 else currentPlayerIndex--;
 
-                if (currentPlayerIndex == -1 && !table.rotation.Get()) currentPlayerIndex = players.Count - 1;
-                else if (currentPlayerIndex == -2 && !table.rotation.Get()) currentPlayerIndex = players.Count - 2;
+                var players = table.players.GetPlayers();
+                if (currentPlayerIndex <= -1 && !table.rotation.Get()) currentPlayerIndex = players.Count - 1;
                 else if (currentPlayerIndex >= players.Count && table.rotation.Get()) currentPlayerIndex = 0;
             }
         }

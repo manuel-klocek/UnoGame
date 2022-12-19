@@ -38,8 +38,8 @@ namespace UnoGame
 
         private void ExecuteTake(Table table, int currentPlayerIndex, bool isBot)
         {
-            var takeCard = table.takeStack.TakeOne();
-            var hand = table.playerHands[currentPlayerIndex];
+            var takeCard = table.takeStack.TakeOne(table);
+            var hand = table.players.GetPlayerHands()[currentPlayerIndex];
             if (!Allowed(table.cardStack, takeCard))
             {
                 hand.Add(takeCard);
@@ -67,7 +67,7 @@ namespace UnoGame
 
         private bool ExecutePlace(Table table, Card card, int currentPlayerIndex, bool isBot)
         {
-            var hand = table.playerHands[currentPlayerIndex];
+            var hand = table.players.GetPlayerHands()[currentPlayerIndex];
             if (Allowed(table.cardStack, card))
             {
                 CheckForBlackColor(hand, card, isBot);
@@ -80,11 +80,11 @@ namespace UnoGame
             return false;
         }
 
-        private void AddPenaltyToHand(int takeNum, PlayerHand hand, TakeStack takeStack)
+        private void AddPenaltyToHand(int takeNum, PlayerHand hand, Table table)
         {
             for(int i = 0; i < takeNum; i++)
             {
-                var taken = takeStack.TakeOne();
+                var taken = table.takeStack.TakeOne(table);
                 hand.Add(taken);
                 Console.WriteLine("Du hast diese Karte gezogen: {0} {1}", taken.GetColor(), taken.GetSymbol());
             }
@@ -117,20 +117,20 @@ namespace UnoGame
         }
 
 
-        public bool CheckAndRunEventsThenSkip(Table table, int currentPlayerIndex)
+        public bool CheckAndRunEventsThenSkip(Table table, int currentPlayerIndex, bool isBot)
         {
-            var hand = table.playerHands[currentPlayerIndex];
+            var hand = table.players.GetPlayerHands()[currentPlayerIndex];
             switch(table.cardStack.GetLast().GetSymbol())
             {
                 case "+2":
-                    if (CanForwardPenalty(table.cardStack, hand)) return true;
+                    if (CanForwardPenalty(table.cardStack, hand, isBot)) return true;
                     var takeNum = SearchForStreak(table.cardStack);
-                    AddPenaltyToHand(takeNum, hand, table.takeStack);
+                    AddPenaltyToHand(takeNum, hand, table);
                     break;
                 case "+4":
-                    if (CanForwardPenalty(table.cardStack, hand)) return true;
+                    if (CanForwardPenalty(table.cardStack, hand, isBot)) return true;
                     takeNum = SearchForStreak(table.cardStack);
-                    AddPenaltyToHand(takeNum, hand, table.takeStack);
+                    AddPenaltyToHand(takeNum, hand, table);
                     break;
                 case "!!":
                     Console.WriteLine("Du musst aussetzen!");
@@ -146,23 +146,22 @@ namespace UnoGame
             return true;
         }
 
-        private bool CanForwardPenalty(CardStack stack, PlayerHand hand)
+        private bool CanForwardPenalty(CardStack stack, PlayerHand hand, bool isBot)
         {
             var cards = hand.GetPlayerCards();
 
             foreach(var card in cards)
             {
-                if (card.GetSymbol() == stack.GetLast().GetSymbol())
+                if (card.GetSymbol() != stack.GetLast().GetSymbol()) return false;
+                if (isBot) return true;
+
+                Console.WriteLine("Möchtest du die Strafe weiterleiten? Wenn ja gib den Index der Karte ein: ");
+                var cardIndex = Convert.ToInt32(Console.ReadLine());
+                if (cards[cardIndex].GetSymbol() == stack.GetLast().GetSymbol())
                 {
-                    Console.WriteLine("Möchtest du die Strafe weiterleiten? Wenn ja gib den Index der Karte ein: ");
-                    var cardIndex = Convert.ToInt32(Console.ReadLine());
-                    if (cards[cardIndex].GetSymbol() == stack.GetLast().GetSymbol())
-                    {
-                        stack.Add(cards[cardIndex]);
-                        hand.RemoveOne(cards[cardIndex]);
-                        return true;
-                    }
-                    return false;
+                    stack.Add(cards[cardIndex]);
+                    hand.RemoveOne(cards[cardIndex]);
+                    return true;    
                 }
             }
             return false;

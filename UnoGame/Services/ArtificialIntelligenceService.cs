@@ -13,7 +13,7 @@ namespace UnoGame.Services
 
 		public Card? determineMove(Table table, int currentPlayerIndex)
 		{
-			var hand = table.playerHands[currentPlayerIndex];
+			var hand = table.players.GetPlayerHands()[currentPlayerIndex];
 			var allowedCards = new List<Card>();
 			var stackCard = table.cardStack.GetRealLast();
 			var logic = new Logic();

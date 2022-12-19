@@ -40,29 +40,38 @@ namespace UnoGame.Repositories
 
     public class TakeStack
     {
-        List<Card> stack;
+        List<Card> takeStack;
 
         public TakeStack(List<Card> stackCards)
         {
-            this.stack = stackCards;
+            this.takeStack = stackCards;
         }
 
 
         public List<Card> GetTakeCards()
         {
-            return this.stack;
+            return this.takeStack;
         }
 
-        public void UpdateTakeCards(List<Card> stack)
+        public void UpdateTakeCards(Table table)
         {
-            //TODO
-            this.stack = stack;
+            var hands = table.players.GetPlayerHands();
+
+            var cardsInGame = new List<Card>();
+            hands.ForEach(hand => hand.GetPlayerCards().ForEach(card => cardsInGame.Add(card)));
+
+            var cards = new SetupCards().Run();
+
+            cards.ForEach(card => { if (cardsInGame.Contains(card)) cards.Remove(card); });
+
+            this.takeStack = cards;
         }
 
-        public Card TakeOne()
+        public Card TakeOne(Table table)
         {
-            var card = this.stack[0];
-            this.stack.Remove(card);
+            if (this.takeStack.Count <= 1) UpdateTakeCards(table);
+            var card = this.takeStack[0];
+            this.takeStack.Remove(card);
             return card;
         }
     }
