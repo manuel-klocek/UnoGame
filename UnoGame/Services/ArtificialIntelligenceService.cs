@@ -6,11 +6,6 @@ namespace UnoGame.Services
 {
 	public class ArtificialIntelligenceService
 	{
-		public ArtificialIntelligenceService()
-		{
-			
-		}
-
 		public Card? determineMove(Table table, int currentPlayerIndex)
 		{
 			var hand = table.players.GetPlayerHands()[currentPlayerIndex];

@@ -36,21 +36,16 @@ namespace UnoGame
             }
 
             //Black Cards: +4 und Farbwahl (==)
-            cards.Add(new Card("black", "+4"));
-            cards.Add(new Card("black", "+4"));
-            cards.Add(new Card("black", "+4"));
-            cards.Add(new Card("black", "+4"));
-
-            cards.Add(new Card("black", "=="));
-            cards.Add(new Card("black", "=="));
-            cards.Add(new Card("black", "=="));
-            cards.Add(new Card("black", "=="));
-
+            for (int i = 0; i < 4; i++)
+            {
+                cards.Add(new Card("black", "+4"));
+                cards.Add(new Card("black", "=="));
+            }
             return Shuffle(cards); 
         }
 
 
-        public List<Card> Shuffle(List<Card> cards)
+        private List<Card> Shuffle(List<Card> cards)
         {
             var random = new Random();
             var newShuffledList = new List<Card>();
