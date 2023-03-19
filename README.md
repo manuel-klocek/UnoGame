@@ -1,4 +1,4 @@
-# Uno_School
+# UnoGame
  School Project from Annmarie Ihrke and Manuel Klocek
 
 ## Overview
