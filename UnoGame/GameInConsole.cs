@@ -7,7 +7,7 @@ namespace UnoGame
 {
 	public class GameInConsole
 	{
-        readonly ArtificialIntelligenceService ai = new ArtificialIntelligenceService();
+        private readonly ArtificialIntelligenceService ai = new ArtificialIntelligenceService();
 
 		public void Run()
 		{
@@ -36,7 +36,7 @@ namespace UnoGame
                 if (!logic.CheckAndRunEventsThenSkip(table, currentPlayerIndex, currentPlayer.GetBot()))
                 {
                     Console.WriteLine("Stack: " + table.cardStack.GetRealLast().GetColor() + " " + table.cardStack.GetRealLast().GetSymbol());
-                    Print(playerCards);
+                    Helpers.Print(playerCards);
 
                     Card? card = null;
                     string? command = null;
@@ -45,19 +45,8 @@ namespace UnoGame
 
                     if (command != null && command == "place") card = playerCards[GetCardIndex()];
 
-                    if (!logic.evaluate(table, currentPlayerIndex, card, currentPlayer.GetBot())) currentPlayerIndex--;
-                }
-
-                if (table.players.GetPlayerHands()[currentPlayerIndex].GetPlayerCards().Count == 0)
-                {
-                    var num = table.players.GetPlayers().Count;
-                    table.players.GetPlayers().Remove(currentPlayer);
-                    var num2 = table.players.GetPlayers().Count;
-                    table.players.GetPlayerHands().Remove(table.players.GetPlayerHands()[currentPlayerIndex]);
-                    Console.WriteLine();
-                    Console.WriteLine("------------------------------------------");
-                    Console.WriteLine($"        {currentPlayer.GetName()}: UNO UNO!");
-                    Console.WriteLine("------------------------------------------");
+                    if (logic.evaluate(table, currentPlayerIndex, card, currentPlayer.GetBot())) CheckForFinish(table, currentPlayerIndex, currentPlayer);
+                    else currentPlayerIndex--;
                 }
 
                 if (direction != table.rotation.Get() && !table.rotation.Get()) currentPlayerIndex-= 2;
@@ -82,13 +71,18 @@ namespace UnoGame
             return Console.ReadLine();
         }
 
-        private static void Print(List<Card> playerCards)
+        private void CheckForFinish(Table table, int currentPlayerIndex, Player currentPlayer)
         {
-            Console.WriteLine("Die Karten deiner Hand sind: ");
-
-            foreach (var card in playerCards)
+            if (table.players.GetPlayerHands()[currentPlayerIndex].GetPlayerCards().Count == 0)
             {
-                Console.WriteLine(card.GetColor() + " " + card.GetSymbol());
+                var num = table.players.GetPlayers().Count;
+                table.players.GetPlayers().Remove(currentPlayer);
+                var num2 = table.players.GetPlayers().Count;
+                table.players.GetPlayerHands().Remove(table.players.GetPlayerHands()[currentPlayerIndex]);
+                Console.WriteLine();
+                Console.WriteLine("------------------------------------------");
+                Console.WriteLine($"        {currentPlayer.GetName()}: UNO UNO!");
+                Console.WriteLine("------------------------------------------");
             }
         }
     }

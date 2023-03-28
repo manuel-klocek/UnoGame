@@ -94,9 +94,7 @@ namespace UnoGame
         public bool Allowed(CardStack cardStack, Card card)
         {
             var lastPlacedCard = cardStack.GetRealLast();
-
-            if ((card.GetSymbol() == "+2" && lastPlacedCard.GetSymbol() == "+2") ||
-                (card.GetColor() == "black")) return true;
+            if (card.GetColor() == "black") return lastPlacedCard.GetColor() == "black" ? false : true;
             else if ((card.GetSymbol() == lastPlacedCard.GetSymbol()) ||
                      (card.GetColor() == lastPlacedCard.GetColor())) return true;
             else return false;
@@ -156,6 +154,7 @@ namespace UnoGame
                 if (isBot) return true;
 
                 Console.WriteLine("Möchtest du die Strafe weiterleiten? Wenn ja gib den Index der Karte ein: ");
+                Helpers.Print(cards);
                 var cardIndex = Convert.ToInt32(Console.ReadLine());
                 if (cards[cardIndex].GetSymbol() == stack.GetLast().GetSymbol())
                 {

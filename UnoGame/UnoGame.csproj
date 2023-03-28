@@ -90,6 +90,7 @@
     <None Include="UnoGameUML.drawio" />
     <Compile Include="Services\ArtificialIntelligenceService.cs" />
     <Compile Include="Repositories\Table.cs" />
+    <Compile Include="Services\Helpers.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
